@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const numbers = [40, 100, 1, 5, 25, 10];
 const fruits = ["Banana", "apple", "Cherry", "date"];
 
@@ -15,7 +14,6 @@ const tagsFromPosts = [
 
 const currentUserRoles = ["user", "editor"];
 const featureAccessRoles = ["admin", "manager"];
-=======
 // const numbers = [40, 100, 1, 5, 25, 10];
 // const fruits = ["Banana", "apple", "Cherry", "date"];
 
@@ -215,4 +213,4 @@ const events = [
     { timestamp: '2024-10-01T10:25:00Z', type: 'click' },
     { timestamp: '2024-10-01T10:30:00Z', type: 'click' },
 ]
->>>>>>> c949f08 (Practice Day-2)
+
