@@ -14,3 +14,37 @@ let nameRoll: [string, number][] = [
 ];
 
 let destination: [string, string, number] = ["Paris", "France", 5];
+
+let user: { name: string; age: number } = {
+  name: "Charlie",
+  age: 28,
+};
+
+let name: { firstName: string; middleName: string; lastName: string } = {
+  firstName: "David",
+  middleName: "Michael",
+  lastName: "Smith",
+};
+
+let optionalName: { firstName: string; middleName?: string; lastName: string } =
+  {
+    firstName: "David",
+    //   middleName: "Michael",
+    lastName: "Smith",
+  };
+
+let userDetails: {
+  organization: string;
+  organization2: "Programming Hero";
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  isMarried: boolean;
+} = {
+  organization: "Tech Corp",
+  organization2: "Programming Hero",
+  firstName: "David",
+  middleName: "Michael",
+  lastName: "Smith",
+  isMarried: true,
+};
