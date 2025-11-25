@@ -14,22 +14,16 @@
 
 // console.log(isEditAllowed); // true
 
-// enum UserRoles {
-//   Admin = "Admin",
-//   User = "User",
-//   Guest = "Guest",
-// }
-
-const UserRoles = {
-  Admin: "Admin",
-  User: "User",
-  Guest: "Guest",
-} as const;
+enum UserRoles {
+  Admin = "Admin",
+  User = "User",
+  Guest = "Guest",
+}
 
 const canEdit = (role: UserRoles) => {
   if (role === UserRoles.Admin || role === UserRoles.User) {
     return true;
-  } else return;
+  } else return false;
 };
 
 const isEditAllowed = canEdit(UserRoles.Admin);
