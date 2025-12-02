@@ -45,41 +45,54 @@ const initDB = async () => {
     )
     `);
 
-  // Insert sample users if table is empty
-  const userCount = await pool.query("SELECT COUNT(*) FROM users");
-  if (userCount.rows[0].count === "0") {
-    await pool.query(`
-      INSERT INTO users (name, email, age, phone, address) VALUES
-      ('John Doe', 'john@example.com', 25, '123-456-7890', '123 Main St'),
-      ('Jane Smith', 'jane@example.com', 30, '098-765-4321', '456 Oak Ave'),
-      ('Bob Johnson', 'bob@example.com', 28, '555-123-4567', '789 Pine Rd')
-    `);
-    console.log("Sample users inserted");
-  }
+  // // Insert sample users if table is empty
+  // const userCount = await pool.query("SELECT COUNT(*) FROM users");
+  // if (userCount.rows[0].count === "0") {
+  //   await pool.query(`
+  //     INSERT INTO users (name, email, age, phone, address) VALUES
+  //     ('John Doe', 'john@example.com', 25, '123-456-7890', '123 Main St'),
+  //     ('Jane Smith', 'jane@example.com', 30, '098-765-4321', '456 Oak Ave'),
+  //     ('Bob Johnson', 'bob@example.com', 28, '555-123-4567', '789 Pine Rd')
+  //   `);
+  //   console.log("Sample users inserted");
+  // }
 
-  // Insert sample todos if table is empty
-  const todoCount = await pool.query("SELECT COUNT(*) FROM todos");
-  if (todoCount.rows[0].count === "0") {
-    await pool.query(`
-      INSERT INTO todos (user_id, title, description, is_completed, due_date) VALUES
-      (1, 'Learn TypeScript', 'Complete TypeScript tutorial', false, '2025-12-15'),
-      (1, 'Build API', 'Create REST API with Express', false, '2025-12-20'),
-      (2, 'Read Book', 'Finish reading Clean Code', true, '2025-12-01'),
-      (3, 'Exercise', 'Go to gym 3 times this week', false, '2025-12-07')
-    `);
-    console.log("Sample todos inserted");
-  }
+  // // Insert sample todos if table is empty
+  // const todoCount = await pool.query("SELECT COUNT(*) FROM todos");
+  // if (todoCount.rows[0].count === "0") {
+  //   await pool.query(`
+  //     INSERT INTO todos (user_id, title, description, is_completed, due_date) VALUES
+  //     (1, 'Learn TypeScript', 'Complete TypeScript tutorial', false, '2025-12-15'),
+  //     (1, 'Build API', 'Create REST API with Express', false, '2025-12-20'),
+  //     (2, 'Read Book', 'Finish reading Clean Code', true, '2025-12-01'),
+  //     (3, 'Exercise', 'Go to gym 3 times this week', false, '2025-12-07')
+  //   `);
+  //   console.log("Sample todos inserted");
+  // }
 };
 
 initDB();
 
-app.post("/", (req: Request, res: Response) => {
-  console.log("Post Request");
-  res.status(200).json({ message: "Hello World!" });
-});
+app.post("/", async (req: Request, res: Response) => {
+  const { name, email, age, phone, address } = req.body;
 
-app.post("/request", (req: Request, res: Response) => {
-  res.send("Got a POST request");
+  try {
+    const result = await pool.query(
+      `INSERT INTO users(name, email, age, phone, address) VALUES($1, $2, $3, $4, $5) RETURNING *`,
+      [name, email, age, phone, address]
+    );
+    console.log(result.rows[0]);
+    res.status(201).json({
+      success: true,
+      message: `User ${name} with email ${email} created.`,
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 });
 
 app.listen(port, () => {
