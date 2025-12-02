@@ -16,12 +16,9 @@ const pool = new Pool({
 });
 
 const initDB = async () => {
-  // Drop existing tables to recreate with correct schema
-  await pool.query(`DROP TABLE IF EXISTS todos CASCADE`);
-  await pool.query(`DROP TABLE IF EXISTS users CASCADE`);
-
+  // Create tables only if they don't exist
   await pool.query(`
-    CREATE TABLE users(
+    CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -33,7 +30,7 @@ const initDB = async () => {
   `);
 
   await pool.query(`
-    CREATE TABLE todos(
+    CREATE TABLE IF NOT EXISTS todos(
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -73,7 +70,7 @@ const initDB = async () => {
 
 initDB();
 
-app.post("/", async (req: Request, res: Response) => {
+app.post("/users", async (req: Request, res: Response) => {
   const { name, email, age, phone, address } = req.body;
 
   try {
@@ -85,6 +82,49 @@ app.post("/", async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       message: `User ${name} with email ${email} created.`,
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+app.get("/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM users`);
+
+    res.status(200).json({
+      success: true,
+      message: "Users retrieved successfully.",
+      data: result.rows,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+app.get("/users/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `User with id ${id} not found.`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `User with id ${id} retrieved successfully.`,
       data: result.rows[0],
     });
   } catch (error: any) {
