@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
 
@@ -70,13 +70,35 @@ const initDB = async () => {
 
 initDB();
 
+// Logger middleware
+
+const logger = (req: Request, res: Response, next: NextFunction) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+};
+
+app.get("/", logger, (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to the User and Todo Management API",
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route Not Found",
+    path: req.path,
+  });
+});
+
 app.post("/users", async (req: Request, res: Response) => {
   const { name, email, age, phone, address } = req.body;
 
   try {
     const result = await pool.query(
       `INSERT INTO users(name, email, age, phone, address) VALUES($1, $2, $3, $4, $5) RETURNING *`,
-      [name, email, age, phone, address]
+      [name, email, age, phone, address],
     );
     console.log(result.rows[0]);
     res.status(201).json({
@@ -140,9 +162,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
   const { name, email, age, phone, address } = req.body;
 
   try {
-    const existingUser = await pool.query(`SELECT * FROM users WHERE id = $1`, [
-      id,
-    ]);
+    const existingUser = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
 
     if (existingUser.rows.length === 0) {
       return res.status(404).json({
@@ -153,7 +173,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
 
     const result = await pool.query(
       `UPDATE users SET name=$1, email=$2, age=$3, phone=$4, address=$5, updated_at=Now() WHERE id=$6 RETURNING *`,
-      [name, email, age, phone, address, id]
+      [name, email, age, phone, address, id],
     );
 
     res.status(200).json({
@@ -173,9 +193,7 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const existingUser = await pool.query(`SELECT * FROM users WHERE id = $1`, [
-      id,
-    ]);
+    const existingUser = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
 
     if (existingUser.rows.length === 0) {
       return res.status(404).json({
@@ -206,7 +224,7 @@ app.post("/todos", async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
       `INSERT INTO todos(user_id, title, description, is_completed, due_date) VALUES($1, $2, $3, $4, $5) RETURNING *`,
-      [user_id, title, description, is_completed, due_date]
+      [user_id, title, description, is_completed, due_date],
     );
     console.log(result.rows[0]);
     res.status(201).json({
@@ -266,9 +284,7 @@ app.put("/todos/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { title, description, is_completed, due_date } = req.body;
   try {
-    const existingTodo = await pool.query(`SELECT * FROM todos WHERE id = $1`, [
-      id,
-    ]);
+    const existingTodo = await pool.query(`SELECT * FROM todos WHERE id = $1`, [id]);
     if (existingTodo.rows.length === 0) {
       return res.status(404).json({
         success: false,
@@ -278,7 +294,7 @@ app.put("/todos/:id", async (req: Request, res: Response) => {
 
     const result = await pool.query(
       `UPDATE todos SET title=$1, description=$2, is_completed=$3, due_date=$4, updated_at=Now() WHERE id=$5 RETURNING *`,
-      [title, description, is_completed, due_date, id]
+      [title, description, is_completed, due_date, id],
     );
 
     res.status(200).json({
@@ -298,9 +314,7 @@ app.delete("/todos/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const existingTodo = await pool.query(`SELECT * FROM todos WHERE id = $1`, [
-      id,
-    ]);
+    const existingTodo = await pool.query(`SELECT * FROM todos WHERE id = $1`, [id]);
     if (existingTodo.rows.length === 0) {
       return res.status(404).json({
         success: false,
